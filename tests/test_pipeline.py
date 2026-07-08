@@ -2,7 +2,7 @@ import asyncio
 
 import pytest
 
-from agentic_rag import (
+from agent import (
     AgenticPipeline,
     ToolContext,
     MockProvider,
@@ -68,8 +68,8 @@ def test_unknown_tool_raises_tool_not_found():
         def complete_json(self, messages, system_prompt=None):
             return {"in_domain": True, "rewritten_query": "x", "tools": [{"name": "nope", "args": {}}]}
 
-    from agentic_rag import PlannerStage
-    from agentic_rag.llm.mock import MockProvider as MP
+    from agent import PlannerStage
+    from agent.llm.mock import MockProvider as MP
     pipe = AgenticPipeline.build_default(providers={role: MP() for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]}, memory=NoOpMemory())
     pipe.planner = PlannerStage(BadPlanner())
     res = pipe.run("hi")
@@ -90,7 +90,7 @@ def test_tool_context_injects_tenant_not_llm():
         def complete_json(self, messages, system_prompt=None):
             return {"in_domain": True, "rewritten_query": "x", "tools": [{"name": "probe", "args": {}}], "reasoning": "probe"}
 
-    from agentic_rag import PlannerStage
+    from agent import PlannerStage
     pipe = AgenticPipeline.build_default(providers={role: ScriptedProvider() for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]}, memory=NoOpMemory())
     pipe.planner = PlannerStage(ProbePlanner())
     res = pipe.run("probe me", tool_ctx=ToolContext(tenant_id=777))
@@ -102,8 +102,8 @@ def test_out_of_domain_skips_tools():
         def complete_json(self, messages, system_prompt=None):
             return {"in_domain": False, "rewritten_query": "x", "tools": [], "reasoning": "out"}
 
-    from agentic_rag import PlannerStage
-    from agentic_rag.llm.mock import MockProvider as MP
+    from agent import PlannerStage
+    from agent.llm.mock import MockProvider as MP
     pipe = AgenticPipeline.build_default(providers={role: MP() for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]}, memory=NoOpMemory())
     pipe.planner = PlannerStage(OODPlanner())
     res = pipe.run("Who won the 2020 olympics?")
@@ -126,7 +126,7 @@ def test_registry_lists_tools():
 
 def test_provider_factory_openai_compat():
     # Just assert the factory wires a provider without network calls.
-    from agentic_rag.llm.factory import make_openai_factory
+    from agent.llm.factory import make_openai_factory
     f = make_openai_factory(api_key="dummy")
     p = f.get("synthesizer")
     assert isinstance(p, OpenAICompatProvider)

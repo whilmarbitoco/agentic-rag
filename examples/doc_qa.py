@@ -7,7 +7,7 @@ changes. That is the whole point of the extendable design.
 """
 from __future__ import annotations
 
-from agentic_rag import (
+from agent import (
     AgenticPipeline,
     ToolContext,
     MockProvider,

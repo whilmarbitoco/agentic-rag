@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agentic_rag import AgenticPipeline, ToolContext, MockProvider, NoOpMemory, tool
+from agent import AgenticPipeline, ToolContext, MockProvider, NoOpMemory, tool
 
 
 @tool("get_weather", description="Current weather", parameters={"type": "object", "properties": {"city": {"type": "string"}}})

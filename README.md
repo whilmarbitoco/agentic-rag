@@ -81,7 +81,7 @@ The whole philosophy is **swap, don't fork**. Four extension points:
    `ToolContext`, never from the LLM.
 
 ```python
-from agentic_rag import AgenticPipeline, ToolContext, tool
+from agent import AgenticPipeline, ToolContext, tool
 
 @tool("get_weather", description="Current weather", parameters={...})
 def get_weather(ctx: ToolContext, city: str):
