@@ -1,5 +1,3 @@
-import asyncio
-
 import pytest
 
 from agent import (
@@ -12,12 +10,17 @@ from agent import (
     ToolNotFoundError,
     get_tool_definitions,
     OpenAICompatProvider,
+    get_default_registry,
 )
 
 
-@tool("get_fact", description="A fact", parameters={"type": "object", "properties": {}})
-def get_fact(ctx: ToolContext) -> dict:
-    return {"summary": "fact", "value": 42}
+@pytest.fixture(scope="module", autouse=True)
+def _register_get_fact():
+    reg = get_default_registry()
+    reg.register("get_fact", "A fact", {"type": "object", "properties": {}},
+                lambda ctx: {"summary": "fact", "value": 42})
+    yield
+    reg.clear()
 
 
 class ScriptedProvider(MockProvider):
@@ -57,7 +60,6 @@ def test_full_pipeline_runs_offline():
 
 
 def test_validator_retry_loop():
-    # Validator fails once, then passes; reply should still be returned.
     res = build_pipeline(fail_validator_once=True).run("What is the fact?")
     assert res.reply == "The answer is 42."
     assert res.trace["validation_warning"] is False
@@ -73,18 +75,22 @@ def test_unknown_tool_raises_tool_not_found():
     pipe = AgenticPipeline.build_default(providers={role: MP() for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]}, memory=NoOpMemory())
     pipe.planner = PlannerStage(BadPlanner())
     res = pipe.run("hi")
-    # Executor isolates the bad tool; no crash, no sources.
     assert res.retrieval_sources == []
-    assert res.reply  # synthesizer still produces an answer from memory-less fallback
+    assert res.reply
 
 
 def test_tool_context_injects_tenant_not_llm():
     seen = {}
 
-    @tool("probe", description="probe", parameters={"type": "object", "properties": {}})
-    def probe(ctx: ToolContext) -> dict:
-        seen["tenant"] = ctx.tenant_id
-        return {"summary": "probe", "v": ctx.tenant_id}
+    def make_probe(store):
+        def probe(ctx: ToolContext) -> dict:
+            store["tenant"] = ctx.tenant_id
+            return {"summary": "probe", "v": ctx.tenant_id}
+        return probe
+
+    reg = get_default_registry()
+    reg.register("probe", "probe", {"type": "object", "properties": {}},
+                 make_probe(seen))
 
     class ProbePlanner(MockProvider):
         def complete_json(self, messages, system_prompt=None):
@@ -96,6 +102,7 @@ def test_tool_context_injects_tenant_not_llm():
     res = pipe.run("probe me", tool_ctx=ToolContext(tenant_id=777))
     assert seen.get("tenant") == 777
     assert res.retrieval_sources
+
 
 def test_out_of_domain_skips_tools():
     class OODPlanner(MockProvider):
@@ -125,10 +132,8 @@ def test_registry_lists_tools():
 
 
 def test_provider_factory_openai_compat():
-    # Just assert the factory wires a provider without network calls.
     from agent.llm.factory import make_openai_factory
     f = make_openai_factory(api_key="dummy")
     p = f.get("synthesizer")
     assert isinstance(p, OpenAICompatProvider)
-    # Fallback path returns None when unset.
     assert f.get_fallback("synthesizer") is None

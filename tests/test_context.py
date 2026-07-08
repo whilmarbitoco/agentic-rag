@@ -1,8 +1,3 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from agent import (
     AgenticPipeline,
     ToolContext,
@@ -11,14 +6,15 @@ from agent import (
     BudgetContextManager,
     WordTokenCounter,
     RankedResult,
-    tool,
+    get_default_registry,
 )
 
 
-@tool("big_doc", description="A large document", parameters={"type": "object", "properties": {}})
-def big_doc(ctx: ToolContext) -> dict:
-    # 1KB+ payload to force compaction under a small tools budget.
-    return {"summary": "doc", "body": "x" * 4000}
+def setup_module(module):
+    reg = get_default_registry()
+    reg.clear()
+    reg.register("big_doc", "A large document", {"type": "object", "properties": {}},
+               lambda ctx: {"summary": "doc", "body": "x" * 4000})
 
 
 class ScriptedProvider(MockProvider):

@@ -51,7 +51,7 @@ class ProviderFactory:
 def make_mock_factory() -> "ProviderFactory":
     """A fully wired factory with mock providers for every role."""
     f = ProviderFactory()
-    for role in ["interpreter", "planner", "reranker", "synthesizer", "memory"]:
+    for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]:
         f.register(role, MockProvider())
     return f
 
@@ -69,7 +69,7 @@ def make_openai_factory(
     Override per-role via `factory.add_openai_compat('synthesizer', ...)`.
     """
     f = ProviderFactory()
-    for role in ["interpreter", "planner", "reranker", "synthesizer", "memory"]:
+    for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]:
         f.add_openai_compat(
             role,
             base_url=base_url,

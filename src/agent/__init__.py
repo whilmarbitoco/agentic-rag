@@ -23,9 +23,10 @@ from .types import (
     ToolResult,
     RankedResult,
     ToolCallRecord,
+    ValidationVerdict,
     PipelineResult,
 )
-from .tools.base import tool, ToolContext, ToolExecutor, ToolNotFoundError, get_tool_definitions
+from .tools.base import tool, ToolContext, ToolExecutor, ToolNotFoundError, get_tool_definitions, get_default_registry
 from .llm.base import LLMProvider, extract_json
 from .llm.openai_compat import OpenAICompatProvider
 from .llm.mock import MockProvider
@@ -59,12 +60,14 @@ __all__ = [
     "ToolResult",
     "RankedResult",
     "ToolCallRecord",
+    "ValidationVerdict",
     "PipelineResult",
     "tool",
     "ToolContext",
     "ToolExecutor",
     "ToolNotFoundError",
     "get_tool_definitions",
+    "get_default_registry",
     "LLMProvider",
     "extract_json",
     "OpenAICompatProvider",

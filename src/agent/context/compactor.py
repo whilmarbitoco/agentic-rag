@@ -8,17 +8,11 @@ compact, source-tagged block.
 """
 from __future__ import annotations
 
-import json
 from abc import ABC, abstractmethod
 
 from ..types import RankedResult
+from ..utils import as_text as _as_text
 from ..llm.base import LLMProvider
-
-
-def _as_text(data, cap: int = 2000) -> str:
-    if isinstance(data, (dict, list)):
-        return json.dumps(data, ensure_ascii=False, default=str)[:cap]
-    return str(data)[:cap]
 
 
 def _truncate_to_tokens(text: str, budget_tokens: int, counter) -> str:
@@ -59,9 +53,8 @@ class HeuristicCompactor(Compactor):
                 used += t
                 continue
             remaining = budget_tokens - used
-            if remaining > 40:
-                # reserve room for the " …[truncated]" tail (~15 tokens)
-                truncated = _truncate_to_tokens(text, max(0, remaining - 15), counter)
+            if remaining > 5:
+                truncated = _truncate_to_tokens(text, max(0, remaining - 5), counter)
                 kept.append(
                     RankedResult(
                         tool_name=r.tool_name,
@@ -81,17 +74,20 @@ class LLMCompactor(Compactor):
     truncated to the budget as a safety net.
     """
 
-    def __init__(self, provider: LLMProvider):
+    def __init__(self, provider: LLMProvider, query: str = ""):
         self.provider = provider
+        self.query = query
 
     def compact(self, items, budget_tokens, counter) -> list[RankedResult]:
         if not items:
             return []
         blob = "\n".join(f"[{r.tool_name}] {_as_text(r.data)}" for r in items)
+        query_part = f"\nTarget question: {self.query}" if self.query else ""
         prompt = (
             f"Summarize the following tool results into a single compact block under "
             f"{budget_tokens} tokens. Preserve every concrete value and tag each fact with "
-            f"its source tool name in brackets, e.g. [tool_name]. Do not invent data.\n\n{blob}"
+            f"its source tool name in brackets, e.g. [tool_name]. Do not invent data."
+            f"{query_part}\n\n{blob}"
         )
         summary = self.provider.complete([{"role": "user", "content": prompt}])
         if counter.count(summary) > budget_tokens:

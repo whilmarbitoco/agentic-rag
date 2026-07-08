@@ -7,7 +7,7 @@ ToolNotFoundError (map to 400 upstream).
 """
 from __future__ import annotations
 
-import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from .base import Stage, StageContext
 from ..types import RetrievalPlan, ToolResult
@@ -17,9 +17,11 @@ from ..tools.base import ToolExecutor, ToolNotFoundError
 class ExecutorStage(Stage):
     name = "executor"
 
+    def __init__(self, max_workers: int = 4):
+        self._executor = ThreadPoolExecutor(max_workers=max_workers)
+
     def run(self, ctx: StageContext, plan: RetrievalPlan | None = None) -> list[ToolResult]:
         executor = ToolExecutor(ctx.tool_ctx)
-        results: list[ToolResult] = []
 
         def call_one(plan_item):
             try:
@@ -27,13 +29,8 @@ class ExecutorStage(Stage):
                 return ToolResult(tool_name=plan_item.name, data=data)
             except ToolNotFoundError as e:
                 return ToolResult(tool_name=plan_item.name, error=str(e))
-            except Exception as e:  # tool bug -> isolated failure, not pipeline crash
+            except Exception as e:
                 return ToolResult(tool_name=plan_item.name, error=f"tool error: {e}")
 
-        loop = asyncio.new_event_loop()
-        try:
-            tasks = [loop.run_in_executor(None, call_one, item) for item in (plan.tools if plan else [])]
-            results = list(loop.run_until_complete(asyncio.gather(*tasks)))
-        finally:
-            loop.close()
-        return results
+        items = plan.tools if plan else []
+        return list(self._executor.map(call_one, items))

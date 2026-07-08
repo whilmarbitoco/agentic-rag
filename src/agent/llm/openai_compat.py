@@ -3,12 +3,12 @@ OpenRouter, Together, vLLM, Ollama, etc.)."""
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Callable
 
 import httpx
 
 from ..errors import LLMProviderError, ProviderRateLimitError
-from .base import LLMProvider, extract_json
+from .base import LLMProvider, extract_json, CONTEXT_WINDOW_FALLBACK
 
 
 class OpenAICompatProvider(LLMProvider):
@@ -20,6 +20,8 @@ class OpenAICompatProvider(LLMProvider):
         timeout: float = 60.0,
         json_mode: bool = False,
         extra_headers: dict[str, str] | None = None,
+        fallback: Callable[[], str] | None = None,
+        context_window: int | None = None,
     ):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
@@ -27,7 +29,20 @@ class OpenAICompatProvider(LLMProvider):
         self.timeout = timeout
         self.json_mode = json_mode
         self.extra_headers = extra_headers or {}
+        self.fallback = fallback
+        self._context_window = context_window
         self._client = httpx.Client(base_url=self.base_url, timeout=timeout)
+
+    @property
+    def context_window(self) -> int:
+        if self._context_window is not None:
+            return self._context_window
+        try:
+            resp = self._client.get(f"/models/{self.model}")
+            data = resp.json()
+            return data.get("max_context_length", CONTEXT_WINDOW_FALLBACK)
+        except Exception:
+            return CONTEXT_WINDOW_FALLBACK
 
     def _headers(self) -> dict[str, str]:
         h = {
@@ -50,12 +65,17 @@ class OpenAICompatProvider(LLMProvider):
             ]
         if want_json and self.json_mode:
             payload["response_format"] = {"type": "json_object"}
-        resp = self._client.post("/chat/completions", json=payload)
-        if resp.status_code == 429:
-            raise ProviderRateLimitError("rate limited")
-        if resp.status_code >= 400:
-            raise LLMProviderError(f"{resp.status_code}: {resp.text[:300]}")
-        return resp.json()["choices"][0]["message"]["content"]
+        try:
+            resp = self._client.post("/chat/completions", json=payload)
+            if resp.status_code == 429:
+                raise ProviderRateLimitError("rate limited")
+            if resp.status_code >= 400:
+                raise LLMProviderError(f"{resp.status_code}: {resp.text[:300]}")
+            return resp.json()["choices"][0]["message"]["content"]
+        except ProviderRateLimitError:
+            if self.fallback:
+                return self.fallback()
+            raise
 
     def complete(self, messages: list[dict], system_prompt: str | None = None) -> str:
         return self._chat(messages, system_prompt, want_json=False)

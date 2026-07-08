@@ -52,6 +52,12 @@ class ToolCallRecord:
 
 
 @dataclass
+class ValidationVerdict:
+    valid: bool = True
+    critique: str = ""
+
+
+@dataclass
 class PipelineResult:
     reply: str
     pipeline_mode: str  # "agentic" | "direct" | "fetch_only" | "out_of_domain"

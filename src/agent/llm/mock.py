@@ -13,8 +13,13 @@ from .base import LLMProvider, extract_json
 
 
 class MockProvider(LLMProvider):
-    def __init__(self, responder: Callable[[list[dict], str | None, bool], Any] | None = None):
+    def __init__(self, responder: Callable[[list[dict], str | None, bool], Any] | None = None, context_window: int = 32_000):
         self.responder = responder or self._default
+        self._context_window = context_window
+
+    @property
+    def context_window(self) -> int:
+        return self._context_window
 
     def _default(self, messages, system_prompt, json_mode):
         if json_mode:

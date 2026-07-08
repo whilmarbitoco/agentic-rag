@@ -42,6 +42,7 @@ from .stages.reranker import RerankerStage
 from .stages.synthesizer import SynthesizerStage
 from .stages.validator import ValidatorStage
 from .context.manager import ContextManager, BudgetContextManager
+from .llm.base import CONTEXT_WINDOW_FALLBACK
 
 
 @dataclass
@@ -76,6 +77,21 @@ class AgenticPipeline:
             memory=mem,
         )
 
+    def _resolve_context_window(self) -> int:
+        windows = []
+        for role in ("interpreter", "planner", "reranker", "synthesizer", "validator"):
+            p = getattr(self, role, None)
+            if p is None:
+                continue
+            llm = getattr(p, "llm", None)
+            if llm is None:
+                continue
+            try:
+                windows.append(llm.context_window)
+            except Exception:
+                pass
+        return min(windows) if windows else CONTEXT_WINDOW_FALLBACK
+
     def run(
         self,
         query: str,
@@ -83,6 +99,22 @@ class AgenticPipeline:
         state: dict | None = None,
     ) -> PipelineResult:
         from .tools.base import ToolContext
+
+        self.context.reset()
+        if isinstance(self.context, BudgetContextManager):
+            self.context = BudgetContextManager(
+                budgets=self.context.budgets if hasattr(self.context, 'budgets') else None,
+                counter=self.context.counter if hasattr(self.context, 'counter') else None,
+                compactor=self.context.compactor if hasattr(self.context, 'compactor') else None,
+                context_window=self._resolve_context_window(),
+            )
+
+        fallbacks: dict[str, LLMProvider] = {}
+        for role in ("interpreter", "planner", "reranker", "synthesizer", "validator"):
+            p = getattr(self, role, None)
+            fb = getattr(p, "fallback", None) if p else None
+            if fb:
+                fallbacks[role] = fb
 
         ctx = StageContext(
             llm={
@@ -92,6 +124,7 @@ class AgenticPipeline:
                 "synthesizer": _p(self.synthesizer, "synthesizer"),
                 "validator": _p(self.validator, "validator"),
             },
+            llm_fallback=fallbacks,
             memory=self.memory,
             tool_ctx=tool_ctx or ToolContext(),
             state=state or {},
@@ -126,10 +159,10 @@ class AgenticPipeline:
             candidate = self.synthesizer.run(ctx, interpreted=interp, plan=plan, ranked=ranked)
             verdict = self.validator.run(ctx, interpreted=interp, ranked=ranked, candidate=candidate)
             last_candidate = candidate
-            if verdict.get("valid", True):
+            if verdict.valid:
                 reply = candidate
                 break
-            ctx.state["validator_critique"] = verdict.get("critique", "")
+            ctx.state["validator_critique"] = verdict.critique
 
         if not reply:
             reply = last_candidate

@@ -28,6 +28,7 @@ class StageContext:
     """Everything a stage needs at runtime."""
 
     llm: dict[str, LLMProvider] = field(default_factory=dict)  # role -> provider
+    llm_fallback: dict[str, LLMProvider] = field(default_factory=dict)  # role -> fallback
     memory: MemoryModule = field(default_factory=MemoryModule)
     tool_ctx: ToolContext = field(default_factory=ToolContext)
     state: dict[str, Any] = field(default_factory=dict)  # scratch space across stages

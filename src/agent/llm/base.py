@@ -16,18 +16,24 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
+CONTEXT_WINDOW_FALLBACK: int = 128_000
+
+
 class LLMProvider(ABC):
     @abstractmethod
     def complete(self, messages: list[dict], system_prompt: str | None = None) -> str:
-        """Return the model's text completion for the given chat messages."""
         ...
 
     def complete_json(self, messages: list[dict], system_prompt: str | None = None) -> dict:
-        """Return parsed JSON. Default: text completion + extraction.
-
-        Override in subclasses that have a native JSON mode.
-        """
         return extract_json(self.complete(messages, system_prompt))
+
+    @property
+    def context_window(self) -> int:
+        """Total token capacity (input + output) for this model.
+
+        Subclasses override. Default assumes a modern model (128K).
+        """
+        return CONTEXT_WINDOW_FALLBACK
 
 
 def extract_json(raw: str) -> dict:
