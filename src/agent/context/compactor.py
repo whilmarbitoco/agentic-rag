@@ -10,9 +10,9 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+from ..llm.base import LLMProvider
 from ..types import RankedResult
 from ..utils import as_text as _as_text
-from ..llm.base import LLMProvider
 
 
 def _truncate_to_tokens(text: str, budget_tokens: int, counter) -> str:

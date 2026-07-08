@@ -2,13 +2,12 @@
 OpenRouter, Together, vLLM, Ollama, etc.)."""
 from __future__ import annotations
 
-import json
 from typing import Any, Callable
 
 import httpx
 
 from ..errors import LLMProviderError, ProviderRateLimitError
-from .base import LLMProvider, extract_json, CONTEXT_WINDOW_FALLBACK
+from .base import CONTEXT_WINDOW_FALLBACK, LLMProvider, extract_json
 
 
 class OpenAICompatProvider(LLMProvider):

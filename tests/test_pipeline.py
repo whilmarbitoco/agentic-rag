@@ -2,15 +2,13 @@ import pytest
 
 from agent import (
     AgenticPipeline,
-    ToolContext,
+    InMemoryMemory,
     MockProvider,
     NoOpMemory,
-    InMemoryMemory,
-    tool,
-    ToolNotFoundError,
-    get_tool_definitions,
     OpenAICompatProvider,
+    ToolContext,
     get_default_registry,
+    get_tool_definitions,
 )
 
 
@@ -71,8 +69,7 @@ def test_unknown_tool_raises_tool_not_found():
             return {"in_domain": True, "rewritten_query": "x", "tools": [{"name": "nope", "args": {}}]}
 
     from agent import PlannerStage
-    from agent.llm.mock import MockProvider as MP
-    pipe = AgenticPipeline.build_default(providers={role: MP() for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]}, memory=NoOpMemory())
+    pipe = AgenticPipeline.build_default(providers={role: MockProvider() for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]}, memory=NoOpMemory())
     pipe.planner = PlannerStage(BadPlanner())
     res = pipe.run("hi")
     assert res.retrieval_sources == []
@@ -110,8 +107,7 @@ def test_out_of_domain_skips_tools():
             return {"in_domain": False, "rewritten_query": "x", "tools": [], "reasoning": "out"}
 
     from agent import PlannerStage
-    from agent.llm.mock import MockProvider as MP
-    pipe = AgenticPipeline.build_default(providers={role: MP() for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]}, memory=NoOpMemory())
+    pipe = AgenticPipeline.build_default(providers={role: MockProvider() for role in ["interpreter", "planner", "reranker", "synthesizer", "validator"]}, memory=NoOpMemory())
     pipe.planner = PlannerStage(OODPlanner())
     res = pipe.run("Who won the 2020 olympics?")
     assert res.pipeline_mode == "out_of_domain"

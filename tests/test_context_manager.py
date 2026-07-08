@@ -1,4 +1,4 @@
-from agent import BudgetContextManager, WordTokenCounter, RankedResult, HeuristicCompactor
+from agent import BudgetContextManager, RankedResult
 
 
 def test_budget_text_within_limit():

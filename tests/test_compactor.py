@@ -1,4 +1,4 @@
-from agent import RankedResult, HeuristicCompactor, WordTokenCounter
+from agent import HeuristicCompactor, RankedResult, WordTokenCounter
 
 
 def _rr(text, score=1):

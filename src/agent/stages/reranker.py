@@ -6,9 +6,9 @@ Override with a cross-encoder / LLM judge by subclassing `Stage`.
 """
 from __future__ import annotations
 
-from .base import Stage, StageContext
-from ..types import ToolResult, RankedResult
 from ..llm.base import LLMProvider
+from ..types import RankedResult, ToolResult
+from .base import Stage, StageContext
 
 
 class RerankerStage(Stage):

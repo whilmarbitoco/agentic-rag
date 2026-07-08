@@ -13,8 +13,6 @@ from __future__ import annotations
 
 import json
 from abc import ABC, abstractmethod
-from typing import Any
-
 
 CONTEXT_WINDOW_FALLBACK: int = 128_000
 

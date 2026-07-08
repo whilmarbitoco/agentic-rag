@@ -6,8 +6,6 @@ single fallback (e.g. OpenRouter free tier) catches 429s transparently.
 """
 from __future__ import annotations
 
-from typing import Callable
-
 from .base import LLMProvider
 from .mock import MockProvider
 from .openai_compat import OpenAICompatProvider

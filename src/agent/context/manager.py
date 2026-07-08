@@ -13,8 +13,8 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from ..types import RankedResult
-from .tokens import TokenCounter, WordTokenCounter
 from .compactor import Compactor, HeuristicCompactor, _as_text, _truncate_to_tokens
+from .tokens import TokenCounter, WordTokenCounter
 
 OVERHEAD: int = 500  # prompt overhead (system, formatting, role tags)
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from agent import MockProvider, NoOpMemory, ToolContext, get_default_registry
+from agent import MockProvider, ToolContext, get_default_registry
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -29,7 +29,6 @@ class ScriptedProvider(MockProvider):
 
     def _respond(self, messages, system_prompt, json_mode):
         if json_mode:
-            text = (messages[-1]["content"] if messages else "").lower()
             if system_prompt and "Interpreter" in system_prompt:
                 return {
                     "resolved_query": messages[-1]["content"],

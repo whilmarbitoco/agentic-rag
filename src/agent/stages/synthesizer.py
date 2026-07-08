@@ -6,11 +6,11 @@ provided sources and cite them. Override by subclassing for a different format.
 """
 from __future__ import annotations
 
-from .base import Stage, StageContext
-from ..types import InterpretedQuery, RetrievalPlan, RankedResult
 from ..llm.base import LLMProvider
 from ..prompts import SYNTHESIZER_SYSTEM, SYNTHESIZER_USER
+from ..types import InterpretedQuery, RankedResult, RetrievalPlan
 from ..utils import as_text
+from .base import Stage, StageContext
 
 
 class SynthesizerStage(Stage):

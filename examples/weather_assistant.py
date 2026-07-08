@@ -1,4 +1,4 @@
-from agent import AgenticPipeline, ToolContext, MockProvider, NoOpMemory, tool
+from agent import AgenticPipeline, MockProvider, NoOpMemory, ToolContext, tool
 
 
 @tool("get_weather", description="Current weather", parameters={"type": "object", "properties": {"city": {"type": "string"}}})

@@ -1,7 +1,7 @@
 from agent import InterpretedQuery, NoOpMemory
-from agent.stages.interpreter import InterpreterStage
-from agent.stages.base import StageContext
 from agent.llm.mock import MockProvider
+from agent.stages.base import StageContext
+from agent.stages.interpreter import InterpreterStage
 
 
 class ValidInterpreter(MockProvider):

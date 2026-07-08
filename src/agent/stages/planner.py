@@ -6,11 +6,11 @@ then answers from knowledge only). This is where you'd add an in-domain guard.
 """
 from __future__ import annotations
 
-from .base import Stage, StageContext
-from ..types import InterpretedQuery, RetrievalPlan, ToolCallPlan
 from ..llm.base import LLMProvider
-from ..tools.base import get_tool_definitions
 from ..prompts import PLANNER_SYSTEM, PLANNER_USER
+from ..tools.base import get_tool_definitions
+from ..types import InterpretedQuery, RetrievalPlan, ToolCallPlan
+from .base import Stage, StageContext
 
 
 class PlannerStage(Stage):

@@ -1,10 +1,13 @@
 from agent import (
-    InterpretedQuery, RetrievalPlan, RankedResult, NoOpMemory,
     BudgetContextManager,
+    InterpretedQuery,
+    NoOpMemory,
+    RankedResult,
+    RetrievalPlan,
 )
-from agent.stages.synthesizer import SynthesizerStage
-from agent.stages.base import StageContext
 from agent.llm.mock import MockProvider
+from agent.stages.base import StageContext
+from agent.stages.synthesizer import SynthesizerStage
 
 
 class SynthProvider(MockProvider):

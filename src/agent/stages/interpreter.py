@@ -7,11 +7,10 @@ stage by subclassing `Stage` and injecting your own logic.
 """
 from __future__ import annotations
 
-from .base import Stage, StageContext
-from ..types import InterpretedQuery
 from ..llm.base import LLMProvider
-from ..memory.base import MemoryModule
 from ..prompts import INTERPRETER_SYSTEM, INTERPRETER_USER
+from ..types import InterpretedQuery
+from .base import Stage, StageContext
 
 
 class InterpreterStage(Stage):

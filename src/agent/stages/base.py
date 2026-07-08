@@ -17,10 +17,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
 
+from ..context.manager import BudgetContextManager, ContextManager
 from ..llm.base import LLMProvider
 from ..memory.base import MemoryModule
-from ..tools.base import ToolContext, ToolExecutor
-from ..context.manager import ContextManager, BudgetContextManager
+from ..tools.base import ToolContext
 
 
 @dataclass

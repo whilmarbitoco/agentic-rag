@@ -8,10 +8,10 @@ Returns a `ValidationVerdict`.
 """
 from __future__ import annotations
 
-from .base import Stage, StageContext
-from ..types import InterpretedQuery, RankedResult, ValidationVerdict
 from ..llm.base import LLMProvider
 from ..prompts import VALIDATOR_SYSTEM, VALIDATOR_USER
+from ..types import InterpretedQuery, RankedResult, ValidationVerdict
+from .base import Stage, StageContext
 
 
 class ValidatorStage(Stage):
