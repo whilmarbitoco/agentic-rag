@@ -31,6 +31,16 @@ from .llm.openai_compat import OpenAICompatProvider
 from .llm.mock import MockProvider
 from .llm.factory import ProviderFactory, make_mock_factory, make_openai_factory
 from .memory.base import MemoryModule, NoOpMemory, InMemoryMemory
+from .context import (
+    ContextManager,
+    BudgetContextManager,
+    TokenCounter,
+    WordTokenCounter,
+    TiktokenTokenCounter,
+    Compactor,
+    HeuristicCompactor,
+    LLMCompactor,
+)
 from .stages.base import Stage, StageContext
 from .stages import (
     InterpreterStage,
@@ -65,6 +75,14 @@ __all__ = [
     "MemoryModule",
     "NoOpMemory",
     "InMemoryMemory",
+    "ContextManager",
+    "BudgetContextManager",
+    "TokenCounter",
+    "WordTokenCounter",
+    "TiktokenTokenCounter",
+    "Compactor",
+    "HeuristicCompactor",
+    "LLMCompactor",
     "Stage",
     "StageContext",
     "InterpreterStage",

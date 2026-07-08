@@ -26,8 +26,10 @@ class SynthesizerStage(Stage):
         ranked: list[RankedResult],
     ) -> str:
         provider = self.llm or ctx.llm.get("synthesizer")
+        # Compaction: keep tool data inside the context-window budget.
+        compacted = ctx.context.prepare_sources(ranked)
         sources = "\n".join(
-            f"[{r.tool_name}] {_as_text(r.data)}" for r in ranked
+            f"[{r.tool_name}] {_as_text(r.data)}" for r in compacted
         ) or "(no tool data retrieved)"
         critique = ctx.state.get("validator_critique", "")
         user = SYNTHESIZER_USER.format(query=interpreted.resolved_query, sources=sources)

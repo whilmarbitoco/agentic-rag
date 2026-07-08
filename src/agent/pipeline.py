@@ -41,6 +41,7 @@ from .stages.executor import ExecutorStage
 from .stages.reranker import RerankerStage
 from .stages.synthesizer import SynthesizerStage
 from .stages.validator import ValidatorStage
+from .context.manager import ContextManager, BudgetContextManager
 
 
 @dataclass
@@ -53,6 +54,7 @@ class AgenticPipeline:
     validator: Stage
     memory: MemoryModule = field(default_factory=NoOpMemory)
     max_validator_retries: int = 1
+    context: ContextManager = field(default_factory=BudgetContextManager)
 
     @classmethod
     def build_default(
@@ -93,10 +95,12 @@ class AgenticPipeline:
             memory=self.memory,
             tool_ctx=tool_ctx or ToolContext(),
             state=state or {},
+            context=self.context,
         )
 
         # Stage 0: interpret
         interp: InterpretedQuery = self.interpreter.run(ctx, query=query)
+        ctx.state["resolved_query"] = interp.resolved_query
 
         # Stage 1: plan
         plan: RetrievalPlan = self.planner.run(ctx, interpreted=interp)
@@ -151,6 +155,7 @@ class AgenticPipeline:
                 "plan": dataclasses.asdict(plan),
                 "ranked": [dataclasses.asdict(r) for r in ranked],
                 "validation_warning": ctx.state.get("validation_warning", False),
+                "context": self.context.report(),
             },
         )
 

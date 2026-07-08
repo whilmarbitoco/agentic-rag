@@ -23,6 +23,7 @@ class InterpreterStage(Stage):
     def run(self, ctx: StageContext, query: str) -> InterpretedQuery:
         provider = self.llm or ctx.llm.get("interpreter")
         mem_ctx = ctx.memory.fetch_context(query)
+        mem_ctx = ctx.context.budget_text("memory", mem_ctx)
         messages = [
             {"role": "user", "content": INTERPRETER_USER.format(query=query, memory=mem_ctx)}
         ]

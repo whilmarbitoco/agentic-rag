@@ -26,6 +26,10 @@ flash:
   regenerates before the user sees them.
 - **Built-in graceful degradation.** Any stage can fail and the pipeline still
   returns a safe answer.
+- **Context-window budgeting & compaction.** Memory and tool data are token-counted
+  and compacted to a configurable budget (`ContextManager`) before they hit the
+  model — long conversations and bulky tool output won't blow the window. Per-section
+  token usage is observable in the run trace.
 - **Trace-based evaluation baked in.** Every run produces a `trace` you can score
   stage-by-stage.
 
@@ -79,6 +83,11 @@ The whole philosophy is **swap, don't fork**. Four extension points:
 3. **`Stage`** — subclass to override or insert any stage (e.g. a safety pre-filter).
 4. **`@tool`** — register deterministic tools; identity/tenant injected via
    `ToolContext`, never from the LLM.
+5. **`ContextManager` / `Compactor` / `TokenCounter`** — context-window budgeting:
+   memory context and tool results are token-counted and compacted to a budget
+   before they reach the LLM. Ships with `BudgetContextManager`, `HeuristicCompactor`,
+   `WordTokenCounter` (swap `TiktokenTokenCounter` for exact counts, `LLMCompactor`
+   for LLM-based summarization). Per-section token usage is reported in the run trace.
 
 ```python
 from agent import AgenticPipeline, ToolContext, tool

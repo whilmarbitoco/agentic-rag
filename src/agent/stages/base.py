@@ -20,6 +20,7 @@ from typing import Any
 from ..llm.base import LLMProvider
 from ..memory.base import MemoryModule
 from ..tools.base import ToolContext, ToolExecutor
+from ..context.manager import ContextManager, BudgetContextManager
 
 
 @dataclass
@@ -30,6 +31,7 @@ class StageContext:
     memory: MemoryModule = field(default_factory=MemoryModule)
     tool_ctx: ToolContext = field(default_factory=ToolContext)
     state: dict[str, Any] = field(default_factory=dict)  # scratch space across stages
+    context: ContextManager = field(default_factory=BudgetContextManager)
 
 
 class Stage(ABC):
