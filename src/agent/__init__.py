@@ -1,4 +1,4 @@
-"""agentic-rag: a domain-agnostic 6-stage agentic RAG pipeline.
+"""joy-agent: the 6-stage agentic RAG pipeline (JOY) from the KLIMA thesis.
 
 Stages:
   0. Interpreter  - resolve references, pick execution mode

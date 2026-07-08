@@ -1,11 +1,11 @@
-# Contributing to `agentic-rag`
+# Contributing to `joy-agent`
 
-`agentic-rag` is the **open-source foundation** of the KLIMA project — a
+`joy-agent` is the **open-source foundation** of the KLIMA project — a
 domain-agnostic, extensible agentic-RAG framework generalized from the
 architecture in the KLIMA undergraduate thesis (Bitoco, 2026).
 
 This repository is the **generic plumbing**. It is intentionally free of any
-single domain. The commercial KLIMA product is built *on top of* `agentic-rag`
+single domain. The commercial KLIMA product is built *on top of* `joy-agent`
 in a separate, proprietary repository.
 
 ---
@@ -16,19 +16,19 @@ in a separate, proprietary repository.
 - Generic provider adapters (OpenAI-compatible, mock) and reference memory modules.
 - Deterministic executor, reranker, validator, synthesizer behavior.
 - Framework-level examples, tests, and documentation.
-- Cross-domain improvements that benefit any agent built on `agentic-rag`.
+- Cross-domain improvements that benefit any agent built on `joy-agent`.
 
 ## What does NOT belong here (out-of-scope)
 
 - Domain-specific tools (weather APIs, government data feeds, crop-disease DBs).
 - Localized prompt sets (e.g. Tagalog / Cebuano tuning) and domain knowledge.
-- Trained models and weights (time-series / climate / recommendation).
+- Model and weights (time-series / climate / recommendation, trained or otherwise).
 - IoT sensor ingestion and device management.
 - The farmer-facing mobile / web client.
 - Managed deployment, hosting, billing, and customer data.
 
 If your change targets a domain, keep it in the product repo and depend on
-`agentic-rag` via `pip install agentic-rag`. If it generalizes cleanly, open a PR here.
+`joy-agent` via `pip install joy-agent`. If it generalizes cleanly, open a PR here.
 
 ---
 

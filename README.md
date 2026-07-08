@@ -1,8 +1,9 @@
-# agentic-rag — The AI Agent Architecture from My Undergraduate Thesis, Open-Sourced
+# Joy Agent — The AI Agent Architecture from My Undergraduate Thesis, Open-Sourced
 
-> A domain-agnostic, extensible 6-stage agentic RAG pipeline generalized from the
-> architecture in *"KLIMA: A Microclimate Monitoring and Decision-Support System
-> for Rice Farming Using IoT and Time-Series Learning in Tagum City"* (Bitoco, 2026).
+> A domain-agnostic, extensible 6-stage agentic RAG pipeline (codenamed **JOY**)
+> generalized from the
+> architecture in _"KLIMA: A Microclimate Monitoring and Decision-Support System
+> for Rice Farming Using IoT and Time-Series Learning in Tagum City"_ (Bitoco, 2026).
 > The original system — codenamed **JOY** — powered a farmer-facing climate advisor.
 > This repo extracts the production-proven architecture into a reusable template.
 > Drop in your own tools, prompts, and LLM providers. No fork required.
@@ -86,15 +87,15 @@ call tools. This architecture was built for **production reliability**, not demo
    (Memory module feeds Interpreter + stores turns in the background)
 ```
 
-| Stage | Role | Default |
-|---|---|---|
-| Interpreter | dereference references, pick execution mode, fetch memory | LLM JSON |
-| Planner | tool selection + query rewrite (in-domain guard) | LLM JSON |
-| Executor | parallel tool calls (deterministic — no LLM) | `ThreadPoolExecutor` |
-| Reranker | relevance scoring | heuristic score (swap for LLM judge) |
-| Synthesizer | grounded answer generation | LLM |
-| Validator | hallucination / grounding guard | heuristic triggers + optional LLM judge |
-| Memory | conversation continuity across turns | `InMemoryMemory` / pluggable |
+| Stage       | Role                                                      | Default                                 |
+| ----------- | --------------------------------------------------------- | --------------------------------------- |
+| Interpreter | dereference references, pick execution mode, fetch memory | LLM JSON                                |
+| Planner     | tool selection + query rewrite (in-domain guard)          | LLM JSON                                |
+| Executor    | parallel tool calls (deterministic — no LLM)              | `ThreadPoolExecutor`                    |
+| Reranker    | relevance scoring                                         | heuristic score (swap for LLM judge)    |
+| Synthesizer | grounded answer generation                                | LLM                                     |
+| Validator   | hallucination / grounding guard                           | heuristic triggers + optional LLM judge |
+| Memory      | conversation continuity across turns                      | `InMemoryMemory` / pluggable            |
 
 ---
 
@@ -163,7 +164,7 @@ Example:
   Interpreter: GPT-4o-mini   (128K)
   Planner:        GPT-4o-mini   (128K)
   Validator:  Llama-3-8B    (8K)    ← bottleneck
-                                   
+
   Budget:  tools ~3.8K | memory ~2K | history ~0.5K | total ~7.5K
 ```
 
@@ -183,17 +184,17 @@ ctx_mgr = BudgetContextManager(budgets={"tools": 2000, "memory": 1000})
 
 ### Token counting
 
-| Counter | When to use |
-|---|---|
-| `WordTokenCounter` | Default. No dependencies. ~1 token per 4 chars. |
+| Counter                | When to use                                                         |
+| ---------------------- | ------------------------------------------------------------------- |
+| `WordTokenCounter`     | Default. No dependencies. ~1 token per 4 chars.                     |
 | `TiktokenTokenCounter` | Exact counts for any OpenAI model. Requires `pip install tiktoken`. |
 
 ### Compaction strategies
 
-| Compactor | Behavior |
-|---|---|
-| `HeuristicCompactor` | Keeps highest-scored results within budget, truncates the overflow item. |
-| `LLMCompactor` | Summarizes all results into one block via an LLM (passes the query for relevance). |
+| Compactor            | Behavior                                                                           |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| `HeuristicCompactor` | Keeps highest-scored results within budget, truncates the overflow item.           |
+| `LLMCompactor`       | Summarizes all results into one block via an LLM (passes the query for relevance). |
 
 ---
 
@@ -228,13 +229,13 @@ Both run fully offline with scripted providers. Swap `ScriptedProvider` for
 ## Provenance & honesty
 
 This is a **faithful generalization** of the JOY pipeline from the KLIMA thesis.
-The thesis contributes the *empirical evaluation* (trace-based, per-stage scoring:
+The thesis contributes the _empirical evaluation_ (trace-based, per-stage scoring:
 Monitoring 0.94 / Knowledge 0.93 / Spatial 0.82); this repo contributes the
-*reusable architecture*. The original system was domain-specific (rice farming);
+_reusable architecture_. The original system was domain-specific (rice farming);
 this template is domain-agnostic.
 
 **Design tradeoff (stated plainly):** the pipeline is a **linear chain**, not a
-re-planning graph. The validator catches *synthesis* errors but cannot re-route a
+re-planning graph. The validator catches _synthesis_ errors but cannot re-route a
 wrong tool choice back to planning. That was a deliberate simplicity decision in
 the thesis; if you need autonomous re-planning, subclass `PlannerStage` +
 `ValidatorStage` into a loop. The interfaces support it.
